@@ -1,0 +1,79 @@
+<Window x:Class="AulaMarkdown.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+ xmlns:wv="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+ Title="AulaMarkdown" Width="1320" Height="900" MinWidth="840" MinHeight="480"
+ WindowStyle="None" WindowStartupLocation="CenterScreen" Icon="Assets/AulaMarkdown.ico"
+ Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextBrush}"
+ FontFamily="Segoe UI" FontSize="12" AllowDrop="True" Drop="Window_Drop" PreviewKeyDown="Window_KeyDown">
+<shell:WindowChrome.WindowChrome><shell:WindowChrome CaptionHeight="31" ResizeBorderThickness="5" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/></shell:WindowChrome.WindowChrome>
+<Window.Resources>
+<SolidColorBrush x:Key="AccentTextBrush" Color="#FFFFFF"/><SolidColorBrush x:Key="WindowBg" Color="#F3F5F8"/><SolidColorBrush x:Key="PanelBg" Color="#FFFFFF"/><SolidColorBrush x:Key="TextBrush" Color="#213044"/><SolidColorBrush x:Key="MutedBrush" Color="#526078"/><SolidColorBrush x:Key="LineBrush" Color="#DCE3EB"/><SolidColorBrush x:Key="AccentBrush" Color="#236BD8"/>
+<Style TargetType="Button"><Setter Property="Padding" Value="8,3"/><Setter Property="Margin" Value="2,0"/><Setter Property="Background" Value="{DynamicResource PanelBg}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource LineBrush}"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="Frame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Frame" Property="BorderThickness" Value="2"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Frame" Property="Opacity" Value=".4"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
+<Style TargetType="ComboBox"><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/><Setter Property="Background" Value="{DynamicResource PanelBg}"/><Setter Property="Margin" Value="3,0,6,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="MinHeight" Value="26"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBox"><Grid><ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen,RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"><ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="4"><TextBlock Text="⌄" HorizontalAlignment="Right" Margin="0,0,9,0" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/></Border></ControlTemplate></ToggleButton.Template></ToggleButton><ContentPresenter Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" Margin="8,2,24,2" IsHitTestVisible="False" VerticalAlignment="Center"/><Popup Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True" Focusable="False"><Border Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Padding="4" MinWidth="{Binding ActualWidth,RelativeSource={RelativeSource TemplatedParent}}"><ScrollViewer><ItemsPresenter/></ScrollViewer></Border></Popup></Grid></ControlTemplate></Setter.Value></Setter></Style>
+<Style TargetType="ComboBoxItem"><Setter Property="Padding" Value="8,4"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/></Style>
+<Style TargetType="TextBox"><Setter Property="Padding" Value="8,3"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/><Setter Property="Background" Value="{DynamicResource PanelBg}"/><Setter Property="BorderBrush" Value="{DynamicResource LineBrush}"/><Setter Property="CaretBrush" Value="{DynamicResource TextBrush}"/></Style>
+<Style x:Key="CaptionButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Width" Value="38"/><Setter Property="Height" Value="30"/><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0"/><Setter Property="BorderBrush" Value="Transparent"/><Setter Property="FontFamily" Value="Segoe MDL2 Assets"/><Setter Property="shell:WindowChrome.IsHitTestVisibleInChrome" Value="True"/></Style>
+</Window.Resources>
+<Grid x:Name="RootSurface" Background="{DynamicResource WindowBg}">
+ <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+ <Border x:Name="TitleBar" Height="32" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1">
+  <DockPanel LastChildFill="True">
+   <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+    <Button Style="{StaticResource CaptionButton}" Content="&#xE946;" Click="About_Click" ToolTip="{DynamicResource Ui.AboutTip}" AutomationProperties.Name="{DynamicResource Ui.About}"/>
+    <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" Click="Minimize_Click" ToolTip="{DynamicResource Ui.Minimize}" AutomationProperties.Name="{DynamicResource Ui.Minimize}"/>
+    <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButton}" Content="&#xE922;" Click="Maximize_Click" ToolTip="{DynamicResource Ui.Maximize}" AutomationProperties.Name="{DynamicResource Ui.Maximize}"/>
+    <Button Style="{StaticResource CaptionButton}" Content="&#xE8BB;" Click="Close_Click" ToolTip="{DynamicResource Ui.Close}" AutomationProperties.Name="{DynamicResource Ui.Close}"/>
+   </StackPanel>
+   <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,12,0">
+    <Image Source="Assets/AulaMarkdown.png" Width="19" Height="19" Margin="0,0,7,0"/>
+    <TextBlock Text="AulaMarkdown" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+    <Border Width="18" Height="12" Margin="12,0,6,0" BorderThickness=".5" BorderBrush="#808080" ToolTip="{DynamicResource Ui.Italy}">
+     <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Border Grid.Column="0" Background="#009246"/><Border Grid.Column="1" Background="#FFFFFF"/><Border Grid.Column="2" Background="#CE2B37"/></Grid>
+    </Border>
+    <TextBlock x:Name="CopyrightLabel" FontSize="11" VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}"/>
+   </StackPanel>
+   <TextBlock x:Name="FileLabel" Text="{DynamicResource Ui.Welcome}" FontSize="11" VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}" TextTrimming="CharacterEllipsis" Margin="2,0,6,0"/>
+  </DockPanel>
+ </Border>
+ <Border x:Name="ToolbarPanel" Background="{DynamicResource WindowBg}" Grid.Row="1" Padding="6,4" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1">
+  <WrapPanel VerticalAlignment="Center">
+   <Button Content="←" Width="28" ToolTip="{DynamicResource Ui.BackTip}" Click="Back_Click" x:Name="BackButton" IsEnabled="False"/>
+   <Button Content="{DynamicResource Ui.Open}" Click="Open_Click" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" ToolTip="{DynamicResource Ui.OpenTip}" Padding="11,3"/>
+   <ComboBox x:Name="ThemeBox" DisplayMemberPath="Label" SelectedValuePath="Value" Width="119" SelectionChanged="Preferences_Changed" ToolTip="{DynamicResource Ui.Theme}" AutomationProperties.Name="{DynamicResource Ui.Theme}"/>
+   <ComboBox x:Name="FontBox" Width="110" SelectionChanged="Preferences_Changed" ToolTip="{DynamicResource Ui.Font}" AutomationProperties.Name="{DynamicResource Ui.Font}"/>
+   <Button Content="A−" Click="Smaller_Click" ToolTip="{DynamicResource Ui.Smaller}"/>
+   <Button x:Name="SizeButton" Content="18 px" Click="ResetSize_Click" ToolTip="{DynamicResource Ui.Reset}" MinWidth="43"/>
+   <Button Content="A+" Click="Larger_Click" ToolTip="{DynamicResource Ui.Larger}"/>
+   <ComboBox x:Name="LayoutBox" DisplayMemberPath="Label" SelectedValuePath="Value" Width="86" SelectionChanged="Preferences_Changed" ToolTip="{DynamicResource Ui.Width}" AutomationProperties.Name="{DynamicResource Ui.Width}"/>
+   <ComboBox x:Name="LanguageBox" Width="83" DisplayMemberPath="Label" SelectedValuePath="Value" SelectionChanged="Language_Changed" ToolTip="{DynamicResource Ui.Language}" AutomationProperties.Name="{DynamicResource Ui.Language}"/>
+   <Button x:Name="IndexButton" Content="{DynamicResource Ui.Index}" Click="Index_Click" ToolTip="{DynamicResource Ui.IndexTip}"/>
+   <Button Content="{DynamicResource Ui.Find}" Click="Find_Click" ToolTip="{DynamicResource Ui.FindTip}"/>
+   <Button Content="{DynamicResource Ui.Fullscreen}" Click="Full_Click" ToolTip="{DynamicResource Ui.FullscreenTip}"/>
+   <Button Content="⋯" FontWeight="Bold" Width="29" Click="Menu_Click" ToolTip="{DynamicResource Ui.MenuTip}"/>
+  </WrapPanel>
+ </Border>
+ <Border Grid.Row="2" x:Name="SearchPanel" Visibility="Collapsed" Padding="8,4" Background="{DynamicResource PanelBg}">
+  <DockPanel><Button DockPanel.Dock="Right" Content="{DynamicResource Ui.Close}" Click="CloseFind_Click"/><Button DockPanel.Dock="Right" Content="↓" Click="NextFind_Click"/><Button DockPanel.Dock="Right" Content="↑" Click="PreviousFind_Click"/><TextBlock DockPanel.Dock="Right" x:Name="SearchCount" VerticalAlignment="Center" Margin="8,0"/><TextBox x:Name="SearchBox" TextChanged="Search_Changed" KeyDown="Search_KeyDown" AutomationProperties.Name="{DynamicResource Ui.SearchText}"/></DockPanel>
+ </Border>
+ <Grid Grid.Row="3" x:Name="ReadingArea">
+  <Grid.ColumnDefinitions><ColumnDefinition x:Name="IndexColumn" Width="212"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+  <Border x:Name="IndexPanel" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0" Padding="8,6,5,6">
+   <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="2,0,0,6">
+     <Button DockPanel.Dock="Right" Content="‹" Width="24" Padding="0" FontSize="18" Click="Index_Click" ToolTip="{DynamicResource Ui.CollapseIndex}" AutomationProperties.Name="{DynamicResource Ui.CollapseIndex}"/>
+     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="{DynamicResource Ui.IndexUpper}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource MutedBrush}"/><TextBlock x:Name="HeadingCount" FontSize="10" Margin="7,0,0,0" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
+    </DockPanel>
+    <ListBox x:Name="Outline" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" SelectionChanged="Outline_Changed" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="12" Margin="2,4"/></DataTemplate></ListBox.ItemTemplate></ListBox>
+   </DockPanel>
+  </Border>
+  <Border x:Name="IndexRail" Visibility="Collapsed" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
+   <StackPanel><Button Content="›" FontSize="20" Padding="0,0" Margin="1,4,2,0" Height="27" Click="Index_Click" ToolTip="{DynamicResource Ui.ExpandIndex}" AutomationProperties.Name="{DynamicResource Ui.ExpandIndex}"/></StackPanel>
+  </Border>
+  <wv:WebView2 x:Name="Browser" Grid.Column="1" AllowDrop="True"/>
+ </Grid>
+ <Border x:Name="StatusPanel" Grid.Row="4" Padding="8,2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,1,0,0">
+  <DockPanel><TextBlock x:Name="LinkCount" DockPanel.Dock="Right" FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="10,0,0,0"/><TextBlock x:Name="StatusText" Text="{DynamicResource Ui.Starting}" FontSize="10" Foreground="{DynamicResource MutedBrush}" TextTrimming="CharacterEllipsis"/></DockPanel>
+ </Border>
+</Grid></Window>
