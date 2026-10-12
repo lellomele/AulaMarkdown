@@ -41,6 +41,7 @@
   <WrapPanel VerticalAlignment="Center">
    <Button Content="←" Width="28" ToolTip="{DynamicResource Ui.BackTip}" Click="Back_Click" x:Name="BackButton" IsEnabled="False"/>
    <Button Content="{DynamicResource Ui.Open}" Click="Open_Click" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" ToolTip="{DynamicResource Ui.OpenTip}" Padding="11,3"/>
+   <Button x:Name="EditButton" Content="{DynamicResource Ui.Edit}" Click="Edit_Click" ToolTip="{DynamicResource Ui.EditTip}" IsEnabled="False"/>
    <ComboBox x:Name="ThemeBox" DisplayMemberPath="Label" SelectedValuePath="Value" Width="119" SelectionChanged="Preferences_Changed" ToolTip="{DynamicResource Ui.Theme}" AutomationProperties.Name="{DynamicResource Ui.Theme}"/>
    <ComboBox x:Name="FontBox" Width="110" SelectionChanged="Preferences_Changed" ToolTip="{DynamicResource Ui.Font}" AutomationProperties.Name="{DynamicResource Ui.Font}"/>
    <Button Content="A−" Click="Smaller_Click" ToolTip="{DynamicResource Ui.Smaller}"/>
@@ -51,7 +52,7 @@
    <Button x:Name="IndexButton" Content="{DynamicResource Ui.Index}" Click="Index_Click" ToolTip="{DynamicResource Ui.IndexTip}"/>
    <Button Content="{DynamicResource Ui.Find}" Click="Find_Click" ToolTip="{DynamicResource Ui.FindTip}"/>
    <Button Content="{DynamicResource Ui.Fullscreen}" Click="Full_Click" ToolTip="{DynamicResource Ui.FullscreenTip}"/>
-   <Button Content="⋯" FontWeight="Bold" Width="29" Click="Menu_Click" ToolTip="{DynamicResource Ui.MenuTip}"/>
+   <Button x:Name="MoreButton" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" Content="⋯" FontWeight="Bold" Width="29" Click="Menu_Click" ToolTip="{DynamicResource Ui.MenuTip}"/>
   </WrapPanel>
  </Border>
  <Border Grid.Row="2" x:Name="SearchPanel" Visibility="Collapsed" Padding="8,4" Background="{DynamicResource PanelBg}">

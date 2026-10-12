@@ -35,6 +35,7 @@ public partial class MainWindow : Window
         int diag=Array.IndexOf(args,"--diagnostics");
         if(diag>=0 && diag+1<args.Length) diagnosticDirectory=Path.GetFullPath(args[diag+1]);
         settings=diagnosticDirectory.Length>0 ? new ReaderSettings() : ReaderSettings.Load();
+        if(!ReaderTheme.All.Any(t=>t.Name==settings.Theme))settings.Theme="Chiaro";
         InitializeComponent();
         CopyrightLabel.Text=AppInfo.Copyright;Title=AppInfo.WindowTitle("");
         LanguageBox.ItemsSource=new[]{new UiChoice("it","Italiano"),new UiChoice("en","English")};
@@ -111,12 +112,13 @@ public partial class MainWindow : Window
             var result=await Task.Run(()=>DocumentRenderer.Render(text,path));
             if(request!=loadId)return;
             if(remember && currentPath.Length>0 && currentPath!=path)history.Push(currentPath);
+            EditButton.IsEnabled=true;
             currentPath=path; rendered=result; pendingFragment=fragment; ready=false;
             FileLabel.Text=Path.GetFileName(path);FileLabel.ToolTip=path;Title=AppInfo.WindowTitle(Path.GetFileName(path));
             Outline.ItemsSource=result.Headings;HeadingCount.Text=result.Headings.Count+" "+UiText.T("Sections");
             LinkCount.Text=result.Links.Count+" "+UiText.T("Links");StatusText.Text=path;
             BackButton.IsEnabled=history.Count>0;
-            settings.Recent.RemoveAll(x=>string.Equals(x,path,StringComparison.OrdinalIgnoreCase));settings.Recent.Insert(0,path);settings.Recent=settings.Recent.Take(10).ToList();SaveSettings();
+            settings.RememberFile(path);SaveSettings();
             string nonce=Guid.NewGuid().ToString("N");
             string html="<!doctype html><html lang='it'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; img-src "+DocumentRenderer.Origin+"; style-src 'unsafe-inline'; script-src 'nonce-"+nonce+"';\"><style>"+Resource("reader.css")+"</style></head><body><main>"+result.Html+"</main><script nonce='"+nonce+"'>"+Resource("reader.js")+"</script></body></html>";
             documentBytes=System.Text.Encoding.UTF8.GetBytes(html);documentUrl=DocumentRenderer.Origin+"/document/"+nonce;Browser.CoreWebView2.Navigate(documentUrl);
@@ -132,6 +134,7 @@ public partial class MainWindow : Window
             string type=root.GetProperty("type").GetString()??"";
             if(type=="ready") { return; }
             else if(type=="link")await HandleUrlAsync(root.GetProperty("value").GetString()??"");
+            else if(type=="linkContext")ShowLinkContextMenu(root.GetProperty("value").GetString()??"");
             else if(type=="drop") { var file=e.AdditionalObjects.OfType<CoreWebView2File>().FirstOrDefault(f=>LinkResolver.IsMarkdown(f.Path));if(file!=null)await LoadFileAsync(file.Path); }
             else if(type=="zoom")await ChangeSizeAsync(root.GetProperty("value").GetInt32());
             else if(type=="fullscreen")await ToggleFullscreenAsync();
@@ -143,6 +146,47 @@ public partial class MainWindow : Window
     {
         if(rendered==null)return;
         if(Uri.TryCreate(url,UriKind.Absolute,out var uri) && uri.GetLeftPart(UriPartial.Authority)==DocumentRenderer.Origin && uri.AbsolutePath.StartsWith("/link/") && int.TryParse(uri.AbsolutePath[6..],out var id) && rendered.Links.TryGetValue(id,out string? raw)) await OpenLinkAsync(raw);
+    }
+    private ContextMenu? localLinkMenu;
+    private ContextMenu? CreateLinkContextMenu(string url)
+    {
+        if(rendered==null || !Uri.TryCreate(url,UriKind.Absolute,out var uri)
+            || uri.GetLeftPart(UriPartial.Authority)!=DocumentRenderer.Origin
+            || !uri.AbsolutePath.StartsWith("/link/")
+            || !int.TryParse(uri.AbsolutePath[6..],out int id)
+            || !rendered.Links.TryGetValue(id,out string? raw))return null;
+        var target=LinkResolver.Resolve(raw,currentPath);
+        if(target.Kind!=LinkKind.Local)return null;
+        var menu=new ContextMenu();
+        var item=new MenuItem{Header=UiText.T("LinkFolder")};
+        item.Click+=(_,_)=>RevealLocalFile(target.Value);
+        menu.Items.Add(item);
+        return menu;
+    }
+    private void ShowLinkContextMenu(string url)
+    {
+        if(localLinkMenu!=null)localLinkMenu.IsOpen=false;
+        localLinkMenu=CreateLinkContextMenu(url);
+        if(localLinkMenu==null)return;
+        localLinkMenu.PlacementTarget=Browser;
+        localLinkMenu.Placement=System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+        localLinkMenu.IsOpen=true;
+    }
+    private void RevealLocalFile(string path)
+    {
+        try
+        {
+            string? folder=Directory.Exists(path)?path:Path.GetDirectoryName(path);
+            if(folder==null || !Directory.Exists(folder)){ShowError(UiText.T("FolderMissing")+folder);return;}
+            // Launch Explorer explicitly: never execute the linked file.
+            var info=new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),"explorer.exe"))
+            {
+                UseShellExecute=true,
+                Arguments=File.Exists(path)?"/select,\""+path+"\"":"\""+folder+"\""
+            };
+            Process.Start(info);
+        }
+        catch(Exception ex){ShowError(UiText.T("OpenError")+ex.Message);}
     }
     internal async Task OpenLinkAsync(string raw)
     {
@@ -275,11 +319,64 @@ public partial class MainWindow : Window
         Add(UiText.T("Reload"),async()=>{if(currentPath.Length>0)await LoadFileAsync(currentPath,remember:false);});
         Add(UiText.T("Folder"),()=>{if(currentPath.Length>0)Process.Start(new ProcessStartInfo(Path.GetDirectoryName(currentPath)!){UseShellExecute=true});});
         menu.Items.Add(new Separator());
-        foreach(string path in settings.Recent.ToArray()){string p=path;Add(Path.GetFileName(p),async()=>await LoadFileAsync(p));}
+        foreach(string path in settings.Recent.Take(ReaderSettings.RecentLimit))
+        {
+            string p=path;
+            var item=new MenuItem{Header=new TextBlock{Text=Path.GetFileName(p)},ToolTip=p};
+            item.Click+=async(_,_)=>await LoadFileAsync(p);
+            menu.Items.Add(item);
+        }
+        if(settings.Recent.Count==0)menu.Items.Add(new MenuItem{Header=UiText.T("NoRecentFiles"),IsEnabled=false});
         menu.Items.Add(new Separator());
+        Add(UiText.T("ChooseEditor"),ChooseEditor);
+        Add(UiText.T("ResetEditor"),()=>{settings.EditorPath="";SaveSettings();StatusText.Text=UiText.T("ResetEditor");});
         Add(UiText.T("Guide"),async()=>await LoadFileAsync(Path.Combine(AppContext.BaseDirectory,UiText.GuideFile)));
+        Add(UiText.T("DefaultApp"),SetDefaultApp);
         Add(UiText.T("AboutMenu"),async()=>await ShowAboutAsync());
         return menu;
+    }
+    private void ChooseEditor()
+    {
+        var dialog=new OpenFileDialog{Title=UiText.T("ChooseEditor"),Filter=UiText.T("ProgramFilter"),CheckFileExists=true};
+        if(dialog.ShowDialog(this)!=true)return;
+        if(Path.GetFileName(dialog.FileName).Equals("AulaMarkdown.exe",StringComparison.OrdinalIgnoreCase))
+        { ShowError(UiText.T("ChooseEditor"));return; }
+        settings.EditorPath=dialog.FileName;SaveSettings();
+        StatusText.Text=UiText.T("EditorSaved")+dialog.FileName;
+    }
+    internal ProcessStartInfo EditorStartInfo(string document)
+    {
+        string editor=string.IsNullOrEmpty(settings.EditorPath)
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"notepad.exe")
+            : settings.EditorPath;
+        if(!File.Exists(editor))throw new FileNotFoundException(UiText.T("EditorMissing"));
+        var start=new ProcessStartInfo(editor){UseShellExecute=false};
+        start.ArgumentList.Add(document);
+        return start;
+    }
+    private void Edit_Click(object sender,RoutedEventArgs e)
+    {
+        try
+        {
+            if(currentPath.Length==0)return;
+            if(!File.Exists(currentPath)){ShowError(UiText.T("FileMissing")+currentPath);return;}
+            Process.Start(EditorStartInfo(currentPath));
+            StatusText.Text=UiText.T("EditorOpened");
+        }
+        catch(Exception ex){ShowError(UiText.T("OpenError")+ex.Message);}
+    }
+    private void SetDefaultApp()
+    {
+        try
+        {
+            DefaultAppRegistration.Register();
+            MessageBox.Show(this,UiText.T("DefaultAppHelp"),AppInfo.Product,MessageBoxButton.OK,MessageBoxImage.Information);
+            DefaultAppRegistration.OpenSettings();
+        }
+        catch(Exception ex)
+        {
+            MessageBox.Show(this,UiText.T("DefaultAppError")+ex.Message,AppInfo.Product,MessageBoxButton.OK,MessageBoxImage.Error);
+        }
     }
     private void Menu_Click(object sender,RoutedEventArgs e)
     {

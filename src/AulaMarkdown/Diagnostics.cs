@@ -28,6 +28,12 @@ public partial class MainWindow
                 settings.Theme=t.Name;await ApplyPreferencesAsync();
                 await Inspect("tema "+t.Name,"getComputedStyle(document.documentElement).getPropertyValue('--paper').trim() === "+JsonSerializer.Serialize(t.Paper));
             }
+            foreach(string name in new[]{"Foresta"})
+            {
+                settings.Theme=name;await ApplyPreferencesAsync();await Task.Delay(100);
+                using var preview=File.Create(Path.Combine(diagnosticDirectory,"tema-"+name+".png"));
+                await Browser.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png,preview);
+            }
             foreach(string font in new[]{"Segoe UI","Arial","Verdana","Georgia"})
             {
                 settings.Font=font;await ApplyPreferencesAsync();
@@ -45,11 +51,27 @@ public partial class MainWindow
             using(var image=File.Create(Path.Combine(diagnosticDirectory,"lettura-blu-notte.png")))await Browser.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png,image);
             settings.Theme="Chiaro";await ApplyPreferencesAsync();
             void Check(string label,bool result){if(!result)throw new Exception("Controllo fallito: "+label);checks.Add(new{label,result});}
-            Check("copyright nella barra del titolo",CopyrightLabel.Text=="(c) 2026 - Prof. Ing. Raffaele Mele"&&Title.Contains(AppInfo.Copyright));
+            Check("copyright nella barra del titolo",CopyrightLabel.Text=="© 2026 - Prof. Ing. Raffaele Mele"&&Title.Contains(AppInfo.Copyright));
+            var localEntry=rendered!.Links.First(x=>LinkResolver.Resolve(x.Value,currentPath).Kind==LinkKind.Local);
+            string localUrl=DocumentRenderer.Origin+"/link/"+localEntry.Key;
+            Check("menu contestuale solo link registrati",CreateLinkContextMenu("https://example.com/link/1")==null);
+            await Browser.ExecuteScriptAsync("document.querySelector('a[href=\""+localUrl+"\"]').dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2}))");
+            await Task.Delay(150);
+            Check("tasto destro su link locale",localLinkMenu?.IsOpen==true && localLinkMenu.Items.OfType<System.Windows.Controls.MenuItem>().Single().Header.ToString()=="Apri cartella del file");
+            localLinkMenu!.IsOpen=false;
+            var recentItems=CreateMenu().Items.OfType<System.Windows.Controls.MenuItem>().Where(m=>m.ToolTip is string path && settings.Recent.Contains(path)).ToList();
+            Check("cronologia direttamente nel menu",recentItems.Count==settings.Recent.Count && recentItems.Count<=10 && recentItems.All(m=>m.Items.Count==0));
+            Check("percorso completo nella cronologia",recentItems.First().ToolTip?.ToString()==settings.Recent[0]);
+            Check("sei temi incluso Foresta",ReaderTheme.All.Length==6 && ReaderTheme.All.Any(t=>t.Name=="Foresta") && !ReaderTheme.All.Any(t=>t.Name is "Molo" or "Sabbia"));
+            Check("pulsante menu evidenziato",MoreButton.Background==Resources["AccentBrush"] && MoreButton.Foreground==Resources["AccentTextBrush"]);
+            Check("modifica disponibile",EditButton.IsEnabled);
+            var editorStart=EditorStartInfo(@"D:\Lezioni con spazi\file.md");
+            Check("editor separato dal visualizzatore",Path.GetFileName(editorStart.FileName)=="notepad.exe" && !editorStart.UseShellExecute && editorStart.ArgumentList.Single()==@"D:\Lezioni con spazi\file.md");
             Check("barra compatta",TitleBar.ActualHeight<=32&&ToolbarPanel.ActualHeight<=40);
             Check("voce Flowgorithm rimossa",!CreateMenu().Items.OfType<System.Windows.Controls.MenuItem>().Any(m=>(m.Header?.ToString()??"").Contains("Scegli Flowgorithm")));
             string documentBefore=await Browser.ExecuteScriptAsync("document.querySelector('main').innerText");
             LanguageBox.SelectedValue="en";await Task.Delay(150);
+            Check("menu link in inglese",CreateLinkContextMenu(localUrl)!.Items.OfType<System.Windows.Controls.MenuItem>().Single().Header.ToString()=="Open file location");
             Check("interfaccia inglese",UiText.Language=="en"&&FindResource("Ui.Open").ToString()=="Open…"&&((UiChoice)ThemeBox.SelectedItem).Label=="Light");
             ThemeBox.UpdateLayout();
             Check("etichetta visibile nel selettore tema",VisualText(ThemeBox).Contains("Light")&&!VisualText(ThemeBox).Contains("UiChoice"));

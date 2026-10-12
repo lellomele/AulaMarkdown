@@ -1,6 +1,7 @@
 const send=(type,value)=>window.chrome.webview.postMessage({type,value});
 for(const t of document.querySelectorAll('table')){const rows=Array.from(t.querySelectorAll('tbody tr'));if(rows.length&&rows.every(r=>/^\d{1,3}$/.test(r.cells[0]?.textContent.trim())))t.classList.add('numbered');const w=document.createElement('div');w.className='table-scroll';w.tabIndex=0;w.setAttribute('aria-label','Tabella: scorrere per leggere tutte le colonne');t.replaceWith(w);w.append(t)}
 document.addEventListener('click',e=>{const a=e.target.closest('a');if(a){e.preventDefault();send('link',a.getAttribute('href'))}});
+document.addEventListener('contextmenu',e=>{const a=e.target.closest('a');if(a){e.preventDefault();send('linkContext',a.getAttribute('href'))}});
 document.addEventListener('auxclick',e=>{const a=e.target.closest('a');if(a){e.preventDefault();if(e.button===1)send('link',a.getAttribute('href'))}});
 document.addEventListener('dragover',e=>e.preventDefault());document.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files.length)window.chrome.webview.postMessageWithAdditionalObjects({type:'drop',value:''},Array.from(e.dataTransfer.files))});
 document.addEventListener('wheel',e=>{if(e.ctrlKey){e.preventDefault();send('zoom',e.deltaY<0?1:-1)}},{passive:false});

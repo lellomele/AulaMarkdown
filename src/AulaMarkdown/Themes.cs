@@ -7,5 +7,6 @@ public sealed record ReaderTheme(string Name,string Window,string Panel,string T
         new("Carta","#EDE5D5","#F8F2E6","#40372C","#6E604E","#D9CEB8","#176C72","#FFFAEF","#F2ECDf","#342B20","light"),
         new("Scuro","#171B22","#212630","#E5E9F0","#AFBACB","#3C4554","#83BCFF","#212630","#2A313D","#FFFFFF","dark"),
         new("Blu notte","#0C192B","#12223A","#E0EBF9","#A9BCD6","#2F4665","#6CDAD4","#12223A","#1B3050","#F2F7FF","dark"),
+        new("Foresta","#10271F","#18382B","#E8F2E9","#B4CEBB","#466B54","#9CDBAC","#18382B","#214735","#F4FFF5","dark"),
         new("Alto contrasto","#000000","#000000","#FFFFFF","#FFFFFF","#FFFFFF","#FFFF00","#000000","#161616","#FFFFFF","dark") ];
 }

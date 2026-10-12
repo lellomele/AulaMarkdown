@@ -58,4 +58,22 @@ if(args.Length>0)
  Equal(local,121,"link del documento di riferimento");
  Console.WriteLine($"Documento di riferimento: {local} link locali validi.");
 }
+var historySettings=new ReaderSettings();
+for(int i=0;i<12;i++)historySettings.RememberFile($@"D:\Lezioni\file{i}.md");
+Equal(historySettings.Recent.Count,10,"limite cronologia");
+Equal(historySettings.Recent[0],@"D:\Lezioni\file11.md","piu recente prima");
+Equal(historySettings.Recent.Contains(@"D:\Lezioni\file0.md"),false,"escluso piu vecchio");
+historySettings.RememberFile(@"d:\lezioni\FILE5.md");
+Equal(historySettings.Recent.Count,10,"riapertura senza duplicati");
+Equal(historySettings.Recent[0],@"d:\lezioni\FILE5.md","riapertura in cima");
+string settingsTest=Path.Combine(Path.GetTempPath(),"AulaMarkdown-history-test-"+Guid.NewGuid().ToString("N"));
+try {
+    historySettings.Theme="Foresta";historySettings.Save(settingsTest);
+    var restored=ReaderSettings.Load(settingsTest);
+    Equal(string.Join(";",restored.Recent),string.Join(";",historySettings.Recent),"cronologia dopo riavvio");
+    Equal(restored.Theme,"Foresta","tema persistente");
+    for(int i=0;i<3;i++)restored.RememberFile(@"D:\Altra cartella\file5.md");
+    Equal(restored.Recent.Count,10,"file omonimo senza duplicati");
+    Equal(restored.Recent.Count(x=>Path.GetFileName(x).Equals("file5.md",StringComparison.OrdinalIgnoreCase)),2,"omonimi in cartelle diverse");
+} finally { if(Directory.Exists(settingsTest))Directory.Delete(settingsTest,true); }
 Console.WriteLine($"Superati {checks} controlli.");

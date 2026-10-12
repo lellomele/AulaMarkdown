@@ -1,4 +1,4 @@
-﻿param([string]$Dotnet='dotnet')
+param([string]$Dotnet='dotnet')
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path $PSScriptRoot -Parent
 $stage=Join-Path $env:TEMP ('AulaMarkdown-build-'+[guid]::NewGuid().ToString('N'))
@@ -19,6 +19,8 @@ try {
  }
  & $Dotnet run --project (Join-Path $stage 'tests\AulaMarkdown.Tests') -c Release
  if($LASTEXITCODE -ne 0){throw 'Verifiche non riuscite'}
+ & $Dotnet run --project (Join-Path $stage 'tests\AulaMarkdown.Windows.Tests') -c Release
+ if($LASTEXITCODE -ne 0){throw 'Verifica registrazione Windows non riuscita'}
  $published=Join-Path $stage 'published'
  & $Dotnet publish (Join-Path $stage 'src\AulaMarkdown\AulaMarkdown.csproj') -c Release -r win-x64 --self-contained true -o $published
  if($LASTEXITCODE -ne 0){throw 'Compilazione non riuscita'}

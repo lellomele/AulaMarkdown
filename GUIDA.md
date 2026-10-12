@@ -63,4 +63,15 @@ I documenti recenti sono nel menu **⋯**. Puoi aprire la cartella del documento
 
 La voce **⋯ → Informazioni / About…**, il pulsante **ⓘ** nella barra del titolo e **F1** mostrano versione, copyright, guida e licenze.
 
-(c) 2026 - Prof. Ing. Raffaele Mele
+© 2026 - Prof. Ing. Raffaele Mele
+
+## App predefinita
+
+Nel menu ⋯ scegli **Imposta come app predefinita…**, quindi conferma AulaMarkdown nelle impostazioni di Windows per `.md`, `.markdown` e `.mdown`. Non occorrono privilegi di amministratore. Se sposti la cartella del programma, ripeti questa operazione dalla nuova posizione.
+
+Con il **tasto destro su un link locale → Apri cartella del file** apri Esplora file con il file selezionato. Se il file non esiste più, viene aperta la cartella quando disponibile. I link a cartelle aprono direttamente la cartella.
+
+
+Nel menu **⋯**, evidenziato come **Apri**, gli ultimi 10 documenti sono elencati direttamente, senza sottomenu. La cronologia resta salvata dopo la chiusura; il percorso completo appare passando il mouse sul nome. I temi sono **Chiaro, Carta, Scuro, Blu notte, Alto contrasto e Foresta**.
+
+**Modifica** apre il documento in Blocco note. Per usare un altro programma, scegli **⋯ → Scegli editor esterno…** e seleziona il suo eseguibile; la scelta viene ricordata. **Usa Blocco note per modificare** ripristina l’editor iniziale. Dopo aver salvato nell’editor, torna al visualizzatore e premi **F5** per aggiornare il documento.

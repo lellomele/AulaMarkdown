@@ -9,6 +9,13 @@ public static class UiText
     public static string Language { get; private set; } = "it";
     public static readonly Dictionary<string,(string It,string En)> Strings = new()
     {
+        ["Edit"]=("Modifica","Edit"),
+        ["EditTip"]=("Apri il documento nell’editor esterno. Dopo il salvataggio, premi F5 per aggiornare la lettura.","Open the document in an external editor. After saving, press F5 to refresh the viewer."),
+        ["ChooseEditor"]=("Scegli editor esterno…","Choose external editor…"),
+        ["ResetEditor"]=("Usa Blocco note per modificare","Use Notepad for editing"),
+        ["EditorMissing"]=("Editor non trovato. Sceglilo nuovamente dal menu ⋯.","Editor not found. Choose it again from the ⋯ menu."),
+        ["EditorOpened"]=("Documento aperto nell’editor. Salva e premi F5 per aggiornare la lettura.","Document opened in the editor. Save and press F5 to refresh the viewer."),
+        ["EditorSaved"]=("Editor selezionato: ","Selected editor: "),
         ["Open"]=("Apri…","Open…"),
         ["OpenTip"]=("Apri Markdown (Ctrl+O)","Open Markdown (Ctrl+O)"),
         ["BackTip"]=("Documento precedente (Alt+Sinistra)","Previous document (Alt+Left)"),
@@ -45,10 +52,18 @@ public static class UiText
         ["Paper"]=("Carta","Paper"),
         ["Dark"]=("Scuro","Dark"),
         ["Night"]=("Blu notte","Midnight blue"),
+        ["Forest"]=("Foresta","Forest"),
+        ["RecentHistory"]=("Cronologia — ultimi 10 file","History — last 10 files"),
+        ["NoRecentFiles"]=("Nessun file recente","No recent files"),
         ["Contrast"]=("Alto contrasto","High contrast"),
         ["Reading"]=("Lettura","Reading"),
         ["Tables"]=("Tabelle","Tables"),
+        ["DefaultApp"]=("Imposta come app predefinita…","Set as default app…"),
+        ["DefaultAppHelp"]=("AulaMarkdown è registrato per .md, .markdown e .mdown. Nelle impostazioni di Windows scegli AulaMarkdown per le estensioni desiderate. Se non appare la pagina dedicata, cerca .md in App predefinite. Mantieni il programma in questa cartella; se lo sposti, ripeti questa operazione.","AulaMarkdown is registered for .md, .markdown and .mdown. In Windows Settings, choose AulaMarkdown for the desired extensions. If the app page does not appear, search for .md in Default apps. Keep the program in this folder; repeat this step if you move it."),
+        ["DefaultAppError"]=("Impossibile completare la registrazione o aprire le impostazioni di Windows:\n","Unable to complete registration or open Windows Settings:\n"),
         ["Reload"]=("Ricarica documento (F5)","Reload document (F5)"),
+        ["LinkFolder"]=("Apri cartella del file","Open file location"),
+        ["FolderMissing"]=("Cartella non trovata:\n","Folder not found:\n"),
         ["Folder"]=("Apri cartella del documento","Open document folder"),
         ["Guide"]=("Guida","Help"),
         ["AboutMenu"]=("Informazioni / About…","About AulaMarkdown…"),
@@ -83,6 +98,6 @@ public static class UiText
         Language=language=="en"?"en":"it";
         foreach(var key in Strings.Keys)resources["Ui."+key]=T(key);
     }
-    public static string ThemeLabel(string name)=>T(name switch{"Carta"=>"Paper","Scuro"=>"Dark","Blu notte"=>"Night","Alto contrasto"=>"Contrast",_=>"Light"});
+    public static string ThemeLabel(string name)=>T(name switch{"Carta"=>"Paper","Scuro"=>"Dark","Blu notte"=>"Night","Alto contrasto"=>"Contrast","Foresta"=>"Forest",_=>"Light"});
     public static string GuideFile=>Language=="en"?"GUIDA.en.md":"GUIDA.md";
 }

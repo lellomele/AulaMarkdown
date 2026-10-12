@@ -59,4 +59,15 @@ Use **⋯ → About AulaMarkdown…**, the **ⓘ** title-bar button or **F1** fo
 
 Theme, font, text size, language and outline state are remembered between sessions. Windows system dialogs may use the language configured in Windows.
 
-(c) 2026 - Prof. Ing. Raffaele Mele
+© 2026 - Prof. Ing. Raffaele Mele
+
+## Default app
+
+Choose **Set as default app…** in the ⋯ menu, then select AulaMarkdown in Windows Settings for `.md`, `.markdown` and `.mdown`. No administrator privileges are required. If you move the program folder, repeat registration from its new location.
+
+**Right-click a local link → Open file location** opens Explorer with the file selected. If the file is missing, its containing folder opens when available. Directory links open that directory. Web links and internal anchors do not show this command.
+
+
+The highlighted **⋯** menu lists the last 10 documents directly, without a submenu. History persists after closing; hover over a filename for its full path. Themes: **Light, Paper, Dark, Midnight blue, High contrast and Forest**.
+
+**Edit** opens the document in Notepad. Select another executable with **⋯ → Choose external editor…**; the choice is remembered. **Use Notepad for editing** restores the default editor. After saving in the editor, return to the viewer and press **F5** to reload.
